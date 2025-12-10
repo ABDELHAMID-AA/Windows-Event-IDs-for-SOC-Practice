@@ -45,17 +45,17 @@ So now let's proceed and install what we need.
 
 ## ⇒ Installing Splunk Server
 
-1.  *\[screenshot of the download\]*
+(images/image1.png)
 
 Now let's wait for it to complete downloading, and after that, we will
 install it.
 
-2.  *\[screenshots of installing\]*
+(images/image2.png)
 
 After completing the installation, let's test if it works well. Let's
 open **localhost:8000** in the browser and see what we get.
 
-3.  *\[screenshot of localhost on the browser\]*
+(images/image3.png)
 
 After setting up the Splunk server, let's move on to the next step.
 
@@ -68,16 +68,16 @@ endpoints.
 
 On the server:
 
-4.  *\[screenshot of the server connection\]*
+(images/image4.png)
 
 Now let's generate 2 auth keys to connect the endpoints.
 
-5.  *\[screenshot of auth keys\]*
+(images/image5.png)
 
 On Endpoint 1:
 
-6.  *\[screenshot of endpoint 1 setting up\]*\
-7.  *\[screenshot of status\]*
+(images/image6.png)
+(images/image7.png)
 
 We do the same thing for the other endpoint.
 
@@ -93,8 +93,8 @@ We will do the same steps on both endpoints:
 After downloading UF, let's install it and configure the information to
 connect to the Deployment Server and the Indexer.
 
-8.  *\[screenshots of configuring it\]*\
-9.  *\[same\]*
+(images/image8.png)
+(images/image9.png)
 
 ------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ Everything should now be working perfectly, so let's check.
 
 After logging in to the Splunk Search Head, we have:
 
-10. *\[screenshot of the forwarders working\]*
+(images/image10.png)
 
 The screenshot above shows the two Universal Forwarders from the Windows
 endpoints successfully connected to the Splunk server. This confirms
