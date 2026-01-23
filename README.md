@@ -1,6 +1,6 @@
 # Windows Event IDs for SOC Practice
 
-This subdirectory is where I study and practice the most important Windows security events as a future SOC analyst.  
+This repo is where I study and practice the most important Windows security events as a future SOC analyst.  
 I'm also using Splunk in my lab to test every event and understand how it looks in real investigations.
 
 ---
