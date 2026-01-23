@@ -63,6 +63,7 @@ In this practice, I did not try to build something complex. I simply combined Ev
 4. Classified activity as **internal password guessing** or **external online brute force** based on the source IP.
 
 **SPL query used in the dashboard:**
+![](images/221.png)
 
 ```spl
 (EventCode=4625 OR EventCode=4624)
@@ -81,9 +82,9 @@ In this practice, I did not try to build something complex. I simply combined Ev
     max(failed_count) as failed_attempts 
     by _time Account_Name Source_Network_Address Logon_Type possible_bruteforce
 ```
-![](images/21.png)
+
 **the dashboard:**
-![](images/22.png)
+![](images/222.png)
 
 **What I learned:**
 
