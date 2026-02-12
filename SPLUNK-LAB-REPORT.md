@@ -1,20 +1,16 @@
-
 # INTRO
 
-Hello, this time I'm going to try to set up an environment to practice a
-SIEM tool (Splunk), which is important in the daily work of a SOC
-analyst. Anyway, let's go step by step and everything will become clear.
+Hello, this time I'm going to set up an environment to practice using a SIEM tool (**Splunk**), which is important in the daily work of a SOC analyst. We’ll go step by step, and everything will become clear.
 
-------------------------------------------------------------------------
+---
 
 # SETTING UP THE ENVIRONMENT
 
-In this lab, I'm going to use my machine (Windows 11) + VMware to create
-2 virtual machines (Windows 10) + Tailscale VPN and, of course, Splunk
-Enterprise and Splunk Universal Forwarder.
+In this lab, I am using my machine (**Windows 11**) + VMware to create two virtual machines (**Windows 10**) connected via **Tailscale VPN**, along with **Splunk Enterprise** and **Splunk Universal Forwarder**.
 
-The architecture of the lab will be as follows:
+The lab architecture is as follows:
 
+```
                       +---------------------------------------+
                       |  MY MACHINE (Admin PC)                |
                       |      Splunk Enterprise Server         |
@@ -27,124 +23,124 @@ The architecture of the lab will be as follows:
     (Tailscale VPN)                                                      (Tailscale VPN)
              |                                                                |
              |                                                                |
-             |                                                                |
      Splunk Universal Forwarder                                    Splunk Universal Forwarder
              |                                                                |
              |                                                                |      
     +---------------------+                               +-----------------------------+
     | Windows Endpoint 1  |                               | Windows Endpoint 2          |
     |   - Event Logs      |                               |   - Event Logs              |
-    |                     |                               |                             |
     +----------+----------+                               +--------------+--------------+
+```
 
-------------------------------------------------------------------------
-
-So now let's proceed and install what we need.
-
-------------------------------------------------------------------------
+---
 
 ## ⇒ Installing Splunk Server
 
 ![](images/image1.png)
 
-Now let's wait for it to complete downloading, and after that, we will
-install it.
+After downloading, install Splunk and test it by opening **localhost:8000** in a browser.
 
 ![](images/image2.png)
-
-After completing the installation, let's test if it works well. Let's
-open **localhost:8000** in the browser and see what we get.
-
 ![](images/image3.png)
 
-After setting up the Splunk server, let's move on to the next step.
+---
 
-------------------------------------------------------------------------
+## ⇒ Installing Tailscale for the Server and Endpoints
 
-## ⇒ Installing Tailscale for the Server and the Endpoints
+Install Tailscale on the server and endpoints.
 
-After downloading Tailscale, install it on the server and on the
-endpoints.
-
-On the server:
+**On the server:**
 
 ![](images/image4.png)
-
-Now let's generate 2 auth keys to connect the endpoints.
+Generate two auth keys to connect the endpoints:
 
 ![](images/image5.png)
 
-On Endpoint 1:
+**On Endpoint 1:**
 
 ![](images/image6.png)
 ![](images/image7.png)
 
-We do the same thing for the other endpoint.
+Repeat the same process for Endpoint 2.
 
-------------------------------------------------------------------------
+---
 
 ## ⇒ Installing Splunk Universal Forwarder
 
-Now, after we put the server and the endpoints in the same network,
-let's install the Universal Forwarders.
-
-We will do the same steps on both endpoints:
-
-After downloading UF, let's install it and configure the information to
-connect to the Deployment Server and the Indexer.
+Install the Universal Forwarder on both endpoints and configure it to connect to the Deployment Server and Indexer.
 
 ![](images/image8.png)
 ![](images/image9.png)
 
-------------------------------------------------------------------------
+After installation, enable listening on the server for ports **8089** and **9997**:
 
-Now after we finished, let's go back to the server machine and enable
-listening on port **8089** and **9997**, because in this lab the Indexer
-and the Deployment Server are running on the same machine.
-
-Open CMD as Administrator and run these commands:
-
-``` cmd
+```cmd
 netsh advfirewall firewall add rule name="for Indexer" dir=in action=allow protocol=TCP localport=9997
-
-netsh advfirewall firewall add rule name="for deployment server" dir=in action=allow protocol=TCP localport=9997
+netsh advfirewall firewall add rule name="for deployment server" dir=in action=allow protocol=TCP localport=8089
 ```
 
-Now on the endpoints, let's enable forwarding:
+On the endpoints, enable forwarding:
 
-``` cmd
+```cmd
 netsh advfirewall firewall add rule name="to the indexer" dir=out action=allow protocol=TCP remoteport=9997
-
 netsh advfirewall firewall add rule name="to the DS" dir=out action=allow protocol=TCP remoteport=8089
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Why We Used TCP and Ports 9997 and 8089
 
-**Port 9997:**\
-This port is used by the Splunk Indexer to receive data from Universal
-Forwarders. TCP is chosen because it ensures reliable delivery of log
-data, meaning no events are lost during transmission between the
-endpoints and the server.
+**Port 9997:** Used by the Splunk Indexer to receive data from Universal Forwarders. TCP ensures reliable delivery of log data, so no events are lost.
 
-**Port 8089 (TCP):**\
-This port is used by the Splunk Deployment Server to communicate with
-Universal Forwarders for configuration updates and app deployment.
-Again, TCP ensures that all configuration messages are reliably sent and
-received.
+**Port 8089:** Used by the Deployment Server to communicate with Universal Forwarders for configuration updates and app deployment. TCP guarantees all configuration messages are reliably sent and received.
 
-------------------------------------------------------------------------
+---
 
-Everything should now be working perfectly, so let's check.
+## ⇒ Log Collection Scope
 
-After logging in to the Splunk Search Head, we have:
+**Windows logs ingested:**
+The Universal Forwarder (UF) is configured to collect all default Windows event logs, including:
+
+* Security log
+* System log
+* Application logs
+* Setup log
+
+> Note: Since the focus is initially on logon events, some of the other logs will not be visible until later.
+![](images/image101.png)
+
+---
+
+## ⇒ Current Detection Focus
+
+Even though multiple logs are being indexed, the detection will initially focus specifically on the **Security log (`WinEventLog:Security`)**, including Event IDs:
+
+* **4624** – Successful logon
+* **4625** – Failed logon
+* **4672** – Special privileges assigned to a new logon
+
+Other log sources, such as **PowerShell execution logs, process creation monitoring, service installation events, firewall activity, and file share access events**, will be incorporated in future detections after completing the analysis of security logs.
+
+---
+
+## ⇒ Forwarder Configuration
+
+* The Universal Forwarder is installed on both Endpoint 1 and Endpoint 2.
+* Logs are forwarded to the Splunk server via **TCP port 9997**.
+* After finishing the important security logs, additional logs will be collected for deeper analysis.
+
+---
+
+Everything should now be working perfectly. After logging in to the Splunk Search Head, we can confirm that both Universal Forwarders are successfully connected to the Splunk server:
 
 ![](images/image10.png)
 
-The screenshot above shows the two Universal Forwarders from the Windows
-endpoints successfully connected to the Splunk server. This confirms
-that the lab environment is properly set up, and the endpoints are ready
-to forward logs to the Splunk Indexer.
+This confirms that the lab environment is properly set up, and the endpoints are ready to forward logs to the Splunk Indexer.
+
+---
 
 That's all for this report.
+
+---
+
+
